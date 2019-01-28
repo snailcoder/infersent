@@ -35,7 +35,8 @@ def main(_):
     if not FLAGS.train_dir:
         raise ValueError("--train_dir is required.")
 
-    print "input_train_file_pattern=", FLAGS.input_train_file_pattern
+    if not tf.gfile.IsDirectory(FLAGS.train_dir):
+        tf.gfile.MakeDirs(FLAGS.train_dir)
 
     model_config = configuration.ModelConfig()
     train_config = configuration.TrainingConfig()
