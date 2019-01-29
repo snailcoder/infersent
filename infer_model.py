@@ -223,17 +223,6 @@ class InferModel(object):
         with tf.variable_scope("linear_layer_2"):
             logits = _linear_layer(features, self.config.num_classes)
 
-        # W = tf.get_variable(
-        #     "fully_connected_W",
-        #     shape=[features_size, self.config.num_classes],
-        #     dtype=tf.float32,
-        #     initializer=self.uniform_initializer)
-        # b = tf.get_variable(
-        #     "fully_connected_b",
-        #     shape=[self.config.num_classes],
-        #     dtype=tf.float32,
-        #     initializer=self.uniform_initializer)
-        # logits = tf.nn.xw_plus_b(features, W, b, name="fully_connected_output")
         losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=self.labels, logits=logits)
         self.target_cross_entropy_loss = tf.reduce_sum(losses)
