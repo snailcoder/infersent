@@ -21,3 +21,5 @@ class TrainingConfig(object):
         self.learning_rate_decay_factor = 0.99
         # Training is stopped when the learning rate goes under this threshold.
         self.learning_rate_threshold = 1.0e-5
+        # If not None, clip gradients to this value.
+        self.clip_gradients = 5.0

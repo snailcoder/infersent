@@ -80,9 +80,12 @@ def main(_):
 
         optimizer = tf.train.GradientDescentOptimizer(
             learning_rate=learning_rate_placeholder)
-        train_op = optimizer.minimize(
-            model_train.target_cross_entropy_loss,
-            global_step=model_train.global_step)
+        grads, vars = zip(*optimizer.compute_gradients(
+            model_train.target_cross_entropy_loss))
+        if train_config.clip_gradients is not None:
+            grads, _ = tf.clip_by_global_norm(grads, train_config.clip_gradients)
+        train_op = optimizer.apply_gradients(
+            zip(grads, vars), global_step=model_train.global_step)
 
         with tf.variable_scope("model", reuse=True):
             model_config.encoder_dropout = 1.0
