@@ -16,7 +16,7 @@ class InferModel(object):
 
         Args:
           config: Object containing configuration parameters.
-          mode: "train", "eval" or "encode".
+          mode: "train" "eval" or "encode".
 
         Raises:
           ValueError: If mode is invalid.
@@ -141,6 +141,8 @@ class InferModel(object):
         
         def _make_cell(num_units):
             cell = tf.nn.rnn_cell.LSTMCell(num_units=num_units)
+            cell = tf.nn.rnn_cell.DropoutWrapper(
+                cell, output_keep_prob=self.config.encoder_dropout)
             return cell
 
         def _build_sentence_vectors(num_units, embedding, length, scope):
@@ -192,17 +194,46 @@ class InferModel(object):
             tf.abs(self.text_vectors - self.hypothesis_vectors),
             tf.multiply(self.text_vectors, self.hypothesis_vectors)], 1)
         features_size = features.get_shape().as_list()[-1]
-        W = tf.get_variable(
-            "fully_connected_W",
-            shape=[features_size, self.config.num_classes],
-            dtype=tf.float32,
-            initializer=self.uniform_initializer)
-        b = tf.get_variable(
-            "fully_connected_b",
-            shape=[self.config.num_classes],
-            dtype=tf.float32,
-            initializer=self.uniform_initializer)
-        logits = tf.nn.xw_plus_b(features, W, b, name="fully_connected_output")
+
+        def _linear_layer(inputs, output_dim):
+            inputs_dim = inputs.get_shape().as_list()[-1]
+            W = tf.get_variable(
+                "W",
+                shape=[inputs_dim, output_dim],
+                dtype=tf.float32,
+                initializer=self.uniform_initializer)
+            b = tf.get_variable(
+                "b",
+                shape=[output_dim],
+                dtype=tf.float32,
+                initializer=self.uniform_initializer)
+            outputs = tf.nn.xw_plus_b(inputs, W, b, name="out")
+            return outputs
+
+        with tf.variable_scope("linear_layer_0"):
+            features = _linear_layer(features, features_size)
+            features = tf.tanh(features)
+            features = tf.nn.dropout(features, keep_prob=self.config.classifier_dropout)
+
+        with tf.variable_scope("linear_layer_1"):
+            features = _linear_layer(features, features_size)
+            features = tf.tanh(features)
+            features = tf.nn.dropout(features, keep_prob=self.config.classifier_dropout)
+
+        with tf.variable_scope("linear_layer_2"):
+            logits = _linear_layer(features, self.config.num_classes)
+
+        # W = tf.get_variable(
+        #     "fully_connected_W",
+        #     shape=[features_size, self.config.num_classes],
+        #     dtype=tf.float32,
+        #     initializer=self.uniform_initializer)
+        # b = tf.get_variable(
+        #     "fully_connected_b",
+        #     shape=[self.config.num_classes],
+        #     dtype=tf.float32,
+        #     initializer=self.uniform_initializer)
+        # logits = tf.nn.xw_plus_b(features, W, b, name="fully_connected_output")
         losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=self.labels, logits=logits)
         self.target_cross_entropy_loss = tf.reduce_sum(losses)

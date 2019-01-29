@@ -69,6 +69,8 @@ def main(_):
         learning_rate_placeholder = tf.placeholder(tf.float32, [], name="learning_rate")
 
         with tf.variable_scope("model"):
+            model_config.encoder_dropout = 0.5
+            model_config.classifier_dropout = 0.5
             model_train = infer_model.InferModel(model_config, mode="train")
             model_train.build(next_text_ids,
                               next_text_mask,
@@ -83,6 +85,8 @@ def main(_):
             global_step=model_train.global_step)
 
         with tf.variable_scope("model", reuse=True):
+            model_config.encoder_dropout = 1.0
+            model_config.classifier_dropout = 1.0
             model_valid = infer_model.InferModel(model_config, mode="eval")
             model_valid.build(next_text_ids,
                               next_text_mask,

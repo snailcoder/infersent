@@ -11,6 +11,8 @@ class ModelConfig(object):
         self.shuffle = True
         self.uniform_init_scale = 0.1
         self.num_classes = 3
+        self.encoder_dropout = 1.0
+        self.classifier_dropout = 1.0
 
 class TrainingConfig(object):
     """Wrapper class for training hyperparameters."""
