@@ -5,7 +5,10 @@ class ModelConfig(object):
     def __init__(self):
         self.vocab_size = 50000
         self.word_embedding_dim = 300
-        self.encoder_dim = 1024
+        # Number of lstm hidden units.
+        self.encoder_dim = 2048
+        # Number of classifier hidden units.
+        self.classifier_dim = 512
         self.batch_size = 64
         # Whether to randomly shuffle the input data.
         self.shuffle = True

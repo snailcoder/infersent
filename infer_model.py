@@ -193,7 +193,6 @@ class InferModel(object):
             self.hypothesis_vectors,
             tf.abs(self.text_vectors - self.hypothesis_vectors),
             tf.multiply(self.text_vectors, self.hypothesis_vectors)], 1)
-        features_size = features.get_shape().as_list()[-1]
 
         def _linear_layer(inputs, output_dim):
             inputs_dim = inputs.get_shape().as_list()[-1]
@@ -211,12 +210,12 @@ class InferModel(object):
             return outputs
 
         with tf.variable_scope("linear_layer_0"):
-            features = _linear_layer(features, features_size)
+            features = _linear_layer(features, self.config.classifier_dim)
             features = tf.tanh(features)
             features = tf.nn.dropout(features, keep_prob=self.config.classifier_dropout)
 
         with tf.variable_scope("linear_layer_1"):
-            features = _linear_layer(features, features_size)
+            features = _linear_layer(features, self.config.classifier_dim)
             features = tf.tanh(features)
             features = tf.nn.dropout(features, keep_prob=self.config.classifier_dropout)
 
