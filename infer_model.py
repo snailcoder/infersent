@@ -225,9 +225,11 @@ class InferModel(object):
 
         losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=self.labels, logits=logits)
-        self.target_cross_entropy_loss = tf.reduce_sum(losses)
-        preds = tf.argmax(logits, axis=1)
-        self.eval_accuracy = tf.reduce_mean(tf.to_float(tf.equal(preds, self.labels)))
+        self.target_cross_entropy_loss = tf.reduce_mean(losses)
+        # preds = tf.argmax(logits, axis=1)
+        # self.eval_accuracy = tf.reduce_mean(tf.to_float(tf.equal(preds, self.labels)))
+        correct = tf.nn.in_top_k(logits, self.labels, 1)
+        self.eval_accuracy = tf.reduce_mean(tf.to_float(correct))
 
     def build_global_step(self):
         """Build the global step Tensor."""
