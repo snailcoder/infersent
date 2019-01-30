@@ -164,7 +164,7 @@ class InferModel(object):
                 self.text_mask, axis=1, name="text_length"))
             text_outputs, _ = _build_sentence_vectors(
                 num_units, self.text_emb, text_len, scope)
-            text_vectors = tf.concat(text_outputs, 1, name="text_vectors")
+            text_vectors = tf.concat(text_outputs, 2, name="text_vectors")
             self.text_vectors = tf.reduce_max(
                 text_vectors, axis=1, name="text_max_pooling")
 
@@ -174,7 +174,7 @@ class InferModel(object):
             hypothesis_outputs, _ = _build_sentence_vectors(
                 num_units, self.hypothesis_emb, hypothesis_len, scope)
             hypothesis_vectors = tf.concat(
-                hypothesis_outputs, 1, name="hypothesis_vectors")
+                hypothesis_outputs, 2, name="hypothesis_vectors")
             self.hypothesis_vectors = tf.reduce_max(
                 hypothesis_vectors, axis=1, name="hypothesis_max_pooling")
 
