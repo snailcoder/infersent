@@ -145,7 +145,7 @@ class InferModel(object):
                 cell, output_keep_prob=1 - self.config.encoder_dropout)
             return cell
 
-        def _build_sentence_vectors(num_units, embedding, length, scope):
+        def _build_sentence_vectors(num_units, embedding, length):
             cell_fw = _make_cell(num_units)
             cell_bw = _make_cell(num_units)
             outputs, states = tf.nn.bidirectional_dynamic_rnn(
@@ -153,26 +153,25 @@ class InferModel(object):
                 cell_bw=cell_bw,
                 inputs=embedding,
                 sequence_length=length,
-                dtype=tf.float32,
-                scope=scope)
+                dtype=tf.float32)
             return outputs, states
 
         num_units = self.config.encoder_dim / 2
 
-        with tf.variable_scope("encode_text") as scope:
+        with tf.variable_scope("encoder"):
             text_len = tf.to_int32(tf.reduce_sum(
                 self.text_mask, axis=1, name="text_length"))
             text_outputs, _ = _build_sentence_vectors(
-                num_units, self.text_emb, text_len, scope)
+                num_units, self.text_emb, text_len)
             text_vectors = tf.concat(text_outputs, 2, name="text_vectors")
             self.text_vectors = tf.reduce_max(
                 text_vectors, axis=1, name="text_max_pooling")
 
-        with tf.variable_scope("encode_hypothesis") as scope:
+        with tf.variable_scope("encoder", reuse=True):
             hypothesis_len = tf.to_int32(tf.reduce_sum(
                 self.hypothesis_mask, axis=1, name="hypothesis_length"))
             hypothesis_outputs, _ = _build_sentence_vectors(
-                num_units, self.hypothesis_emb, hypothesis_len, scope)
+                num_units, self.hypothesis_emb, hypothesis_len)
             hypothesis_vectors = tf.concat(
                 hypothesis_outputs, 2, name="hypothesis_vectors")
             self.hypothesis_vectors = tf.reduce_max(
