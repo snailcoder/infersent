@@ -141,16 +141,12 @@ def main(_):
             total_valid_accuracy = 0.0
             while True:
                 try:
-                    valid_loss, valid_accuracy, text_ids, text_emb = sess.run([
+                    valid_loss, valid_accuracy = sess.run([
                         model_valid.target_cross_entropy_loss,
-                        model_valid.eval_accuracy,
-                        model_valid.text_ids,
-                        model_valid.text_emb])
+                        model_valid.eval_accuracy])
                     total_valid_batch += 1
                     total_valid_loss += valid_loss
                     total_valid_accuracy += valid_accuracy
-                    print "text_ids=", text_ids
-                    print "text_emb=", text_emb
                 except tf.errors.OutOfRangeError:
                     break
             valid_loss = total_valid_loss / total_valid_batch
