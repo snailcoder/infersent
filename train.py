@@ -124,9 +124,7 @@ def main(_):
                     _, train_loss, train_accuracy = sess.run([
                         train_op,
                         model_train.target_cross_entropy_loss,
-                        model_train.eval_accuracy,
-                        model_train.text_ids,
-                        model_train.text_emb],
+                        model_train.eval_accuracy],
                         feed_dict={learning_rate_placeholder: lr})
                     total_train_batch += 1
                     total_train_loss += train_loss
