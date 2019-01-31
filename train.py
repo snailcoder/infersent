@@ -121,8 +121,12 @@ def main(_):
             total_train_accuracy = 0.0
             while True:
                 try:
-                    _, train_loss, train_accuracy = sess.run(
-                        [train_op, model_train.target_cross_entropy_loss, model_train.eval_accuracy],
+                    _, train_loss, train_accuracy = sess.run([
+                        train_op,
+                        model_train.target_cross_entropy_loss,
+                        model_train.eval_accuracy,
+                        model_train.text_ids,
+                        model_train.text_emb],
                         feed_dict={learning_rate_placeholder: lr})
                     total_train_batch += 1
                     total_train_loss += train_loss
@@ -139,12 +143,16 @@ def main(_):
             total_valid_accuracy = 0.0
             while True:
                 try:
-                    valid_loss, valid_accuracy = sess.run([
+                    valid_loss, valid_accuracy, text_ids, text_emb = sess.run([
                         model_valid.target_cross_entropy_loss,
-                        model_valid.eval_accuracy])
+                        model_valid.eval_accuracy,
+                        model_valid.text_ids,
+                        model_valid.text_emb])
                     total_valid_batch += 1
                     total_valid_loss += valid_loss
                     total_valid_accuracy += valid_accuracy
+                    print "text_ids=", text_ids
+                    print "text_emb=", text_emb
                 except tf.errors.OutOfRangeError:
                     break
             valid_loss = total_valid_loss / total_valid_batch
