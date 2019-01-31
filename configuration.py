@@ -14,8 +14,8 @@ class ModelConfig(object):
         self.shuffle = True
         self.uniform_init_scale = 0.1
         self.num_classes = 3
-        self.encoder_dropout = 1.0
-        self.classifier_dropout = 1.0
+        self.encoder_dropout = 0.0
+        self.classifier_dropout = 0.0
 
 class TrainingConfig(object):
     """Wrapper class for training hyperparameters."""
@@ -26,3 +26,4 @@ class TrainingConfig(object):
         self.learning_rate_threshold = 1.0e-5
         # If not None, clip gradients to this value.
         self.clip_gradients = 5.0
+        self.num_epochs = 20

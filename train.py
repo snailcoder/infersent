@@ -88,8 +88,8 @@ def main(_):
             zip(grads, vars), global_step=model_train.global_step)
 
         with tf.variable_scope("model", reuse=True):
-            model_config.encoder_dropout = 1.0
-            model_config.classifier_dropout = 1.0
+            model_config.encoder_dropout = 0.0
+            model_config.classifier_dropout = 0.0
             model_valid = infer_model.InferModel(model_config, mode="eval")
             model_valid.build(next_text_ids,
                               next_text_mask,
@@ -112,24 +112,27 @@ def main(_):
         prev_accuracy = 0.0
         max_accuracy = 0.0
         epoch = 0
-        while lr > train_config.learning_rate_threshold:
+        while lr > train_config.learning_rate_threshold and epoch <= train_config.num_epochs:
             # Initialize the iterator on training and valid dataset.
             sess.run(training_iterator_init)
             tf.logging.info("Epoch %d, learning rate: %f" % (epoch, lr))
             total_train_batch = 0
             total_train_loss = 0.0
+            total_train_accuracy = 0.0
             while True:
                 try:
-                    _, train_loss = sess.run(
-                        [train_op, model_train.target_cross_entropy_loss],
+                    _, train_loss, train_accuracy = sess.run(
+                        [train_op, model_train.target_cross_entropy_loss, model_train.eval_accuracy],
                         feed_dict={learning_rate_placeholder: lr})
                     total_train_batch += 1
                     total_train_loss += train_loss
+                    total_train_accuracy += train_accuracy
                     tf.logging.info("Batch %d, loss: %f" % (total_train_batch, train_loss))
                 except tf.errors.OutOfRangeError:
                     break
             train_loss = total_train_loss / total_train_batch
-            tf.logging.info("Train loss: %f" % train_loss)
+            train_accuracy = total_train_accuracy / total_train_batch
+            tf.logging.info("Train loss: %f, accuracy: %f" % (train_loss, train_accuracy))
             sess.run(valid_iterator_init)
             total_valid_batch = 0
             total_valid_loss = 0.0
@@ -155,6 +158,7 @@ def main(_):
                 max_accuracy = valid_accuracy
                 saver.save(sess, FLAGS.train_dir, global_step=model_train.global_step)
             prev_accuracy = valid_accuracy
+            epoch += 1
 
 if __name__ == "__main__":
     tf.app.run()
