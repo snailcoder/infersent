@@ -141,8 +141,8 @@ class InferModel(object):
         
         def _make_cell(num_units):
             cell = tf.nn.rnn_cell.LSTMCell(num_units=num_units)
-            cell = tf.nn.rnn_cell.DropoutWrapper(
-                cell, output_keep_prob=1 - self.config.encoder_dropout)
+            # cell = tf.nn.rnn_cell.DropoutWrapper(
+            #     cell, output_keep_prob=1 - self.config.encoder_dropout)
             return cell
 
         def _build_sentence_vectors(num_units, embedding, length):
@@ -210,13 +210,13 @@ class InferModel(object):
 
         with tf.variable_scope("linear_layer_0"):
             features = _linear_layer(features, self.config.classifier_dim)
-            features = tf.tanh(features)
-            features = tf.nn.dropout(features, keep_prob=1 - self.config.classifier_dropout)
+            # features = tf.tanh(features)
+            # features = tf.nn.dropout(features, keep_prob=1 - self.config.classifier_dropout)
 
         with tf.variable_scope("linear_layer_1"):
             features = _linear_layer(features, self.config.classifier_dim)
-            features = tf.tanh(features)
-            features = tf.nn.dropout(features, keep_prob=1 - self.config.classifier_dropout)
+            # features = tf.tanh(features)
+            # features = tf.nn.dropout(features, keep_prob=1 - self.config.classifier_dropout)
 
         with tf.variable_scope("linear_layer_2"):
             logits = _linear_layer(features, self.config.num_classes)
