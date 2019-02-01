@@ -141,8 +141,8 @@ class InferModel(object):
         
         def _make_cell(num_units):
             cell = tf.nn.rnn_cell.LSTMCell(num_units=num_units)
-            # cell = tf.nn.rnn_cell.DropoutWrapper(
-            #     cell, output_keep_prob=1 - self.config.encoder_dropout)
+            cell = tf.nn.rnn_cell.DropoutWrapper(
+                cell, output_keep_prob=1 - self.config.encoder_dropout)
             return cell
 
         def _build_sentence_vectors(num_units, embedding, length):
@@ -208,18 +208,45 @@ class InferModel(object):
             outputs = tf.nn.xw_plus_b(inputs, W, b, name="out")
             return outputs
 
-        with tf.variable_scope("linear_layer_0"):
-            features = _linear_layer(features, self.config.classifier_dim)
-            # features = tf.tanh(features)
-            # features = tf.nn.dropout(features, keep_prob=1 - self.config.classifier_dropout)
+        def _linear_classifier(features, classifier_dim, num_classes):
+            with tf.variable_scope("linear_layer_0"):
+                features = _linear_layer(features, classifier_dim)
 
-        with tf.variable_scope("linear_layer_1"):
-            features = _linear_layer(features, self.config.classifier_dim)
-            # features = tf.tanh(features)
-            # features = tf.nn.dropout(features, keep_prob=1 - self.config.classifier_dropout)
+            with tf.variable_scope("linear_layer_1"):
+                features = _linear_layer(features, classifier_dim)
 
-        with tf.variable_scope("linear_layer_2"):
-            logits = _linear_layer(features, self.config.num_classes)
+            with tf.variable_scope("linear_layer_2"):
+                logits = _linear_layer(features, num_classes)
+
+            return logits
+
+        def _nonlinear_classifier(features, classifier_dim, num_classes, dropout):
+            with tf.variable_scope("nonlinear_layer_0"):
+                features = _linear_layer(features, classifier_dim)
+                features = tf.tanh(features)
+                features = tf.nn.dropout(features, keep_prob=1 - dropout)
+
+            with tf.variable_scope("nonlinear_layer_1"):
+                features = _linear_layer(features, classifier_dim)
+                features = tf.tanh(features)
+                features = tf.nn.dropout(features, keep_prob=1 - dropout)
+
+            with tf.variable_scope("nonlinear_layer_2"):
+                logits = _linear_layer(features, num_classes)
+
+            return logits
+
+        if self.config.nonlinear_classifier:
+            logits = _nonlinear_classifier(
+                features,
+                self.config.classifier_dim,
+                self.config.num_classes,
+                self.config.classifier_dropout)
+        else:
+            logits = _linear_classifier(
+                features,
+                self.config.classifier_dim,
+                self.config.num_classes)
 
         losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=self.labels, logits=logits)
