@@ -14,7 +14,7 @@ class ModelConfig(object):
         self.shuffle = True
         self.uniform_init_scale = 0.1
         self.num_classes = 3
-        self.nonlinear_classifier = False
+        self.nonlinear_classifier = True
         self.encoder_dropout = 0.0
         self.classifier_dropout = 0.0
 

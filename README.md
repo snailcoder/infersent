@@ -17,3 +17,11 @@ python preprocess_dataset.py --glove_file /path/to/your/glove --input_files /pat
 ```bash
 python train.py --glove_file /path/to/your/glove --input_train_file_pattern "/path/to/save/tfrecords/train-?????-of-?????" --input_valid_file_pattern "/path/to/save/tfrecords/valid-?????-of-?????" --train_dir /path/to/save/checkpoints
 ```
+
+## Experiment result
+With the default settings in configurations.py, I obtained a dev accuracy of 83.72% in epoch 5,
+83.37% in epoch 10.
+
+## Tips for fine-tuning
+Don't dropout too much. When the classifier and encoder dropout are both set to 0.5, both the
+train and the dev accuracy is decreased below 70%.
