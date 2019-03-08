@@ -158,7 +158,9 @@ def main(_):
                 lr /= 5
             if valid_accuracy > max_accuracy:
                 max_accuracy = valid_accuracy
-                saver.save(sess, FLAGS.train_dir, global_step=model_train.global_step)
+                saver.save(sess,
+                           os.path.join(FLAGS.train_dir, "model.ckpt"),
+                           global_step=model_train.global_step)
             prev_accuracy = valid_accuracy
             epoch += 1
 
